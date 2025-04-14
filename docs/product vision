@@ -1,0 +1,3 @@
+product vision:
+Sistema web  para agentes de saúde que desejam organizar as demandas referentes  a cada paciente durante o dia a dia, além de possibilitar que algum administrador adicione pacientes ou demandas  para aquele trabalhador . A plataforma deve conter o cadastro, esse cadastro deve ter duas opções: uma de administrador e outra de usuário padrão, e que contenha o cadastro de paciente, com suas informações, além de gerar uma rota no mapa da sequência de visitas a domicílio que deve ser seguida.por fim o sistema web deve  mostrar relatório de visitas anteriores .
+
