@@ -29,7 +29,7 @@ const db = require('./models');
 const criarMicroareaPadrao = async () => {
     try {
         const microareaPadrao = await db.Microarea.findOne({
-            where: { nome: 'Microárea Padrão' },
+            where: { nome: 'Microárea 01' },
         });
 
         if (!microareaPadrao) {
@@ -46,7 +46,7 @@ const criarMicroareaPadrao = async () => {
     }
 };
 
-db.sequelize.sync().then(() => {
+db.sequelize.sync({ force: true }).then(() => {
     console.log('Banco de dados sincronizado.');
     criarMicroareaPadrao();
 });
