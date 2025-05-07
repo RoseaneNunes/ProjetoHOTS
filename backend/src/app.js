@@ -23,30 +23,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}!`);
 });
-
-const db = require('./models');
-
-const criarMicroareaPadrao = async () => {
-    try {
-        const microareaPadrao = await db.Microarea.findOne({
-            where: { nome: 'Microárea 01' },
-        });
-
-        if (!microareaPadrao) {
-            await db.Microarea.create({
-                nome: 'Microárea Padrão',
-                descricao: 'Microárea criada automaticamente para uso inicial.',
-            });
-            console.log('Microárea padrão criada com sucesso.');
-        } else {
-            console.log('Microárea padrão já existe.');
-        }
-    } catch (error) {
-        console.error('Erro ao criar microárea padrão:', error);
-    }
-};
-
-db.sequelize.sync({ force: true }).then(() => {
-    console.log('Banco de dados sincronizado.');
-    criarMicroareaPadrao();
-});
