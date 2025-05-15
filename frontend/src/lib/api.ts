@@ -2,9 +2,8 @@ import axios from 'axios';
 import 'dotenv/config' ;
 
 const api = axios.create({
-  baseURL: process.env.API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
-
 
 
 type CheckErrorCallback = (message: string) => void;
@@ -31,6 +30,7 @@ const checkError = (
     const message = String(error);
     onOtherError(message);
   }
+  
 };
 
 export { api, checkError };

@@ -165,7 +165,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\vitor\\OneDrive\\Documentos\\Code\\Web\\UEPB\\ProjetoHOTS\\backend\\src\\generated\\prisma",
+      "value": "C:\\Users\\rosea\\OneDrive\\Documentos\\teste\\ProjetoHOTS\\backend\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -179,7 +179,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\vitor\\OneDrive\\Documentos\\Code\\Web\\UEPB\\ProjetoHOTS\\backend\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\rosea\\OneDrive\\Documentos\\teste\\ProjetoHOTS\\backend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -197,7 +197,7 @@ const config = {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://postgres:admin@localhost:5433/projetos?schema=public"
+        "value": "postgresql://postgres:Rose159753@localhost:5432/postgres?schema=public"
       }
     }
   },

@@ -1,10 +1,11 @@
+import { AuthProvider } from '@/context/contextAuth';
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import { Toaster } from 'react-hot-toast';
 
 export default function App({ Component, pageProps }: AppProps) {
     return (
-        <div>
+            <AuthProvider> 
             <Component {...pageProps} />
             <Toaster
                 position="bottom-right"
@@ -37,7 +38,7 @@ export default function App({ Component, pageProps }: AppProps) {
                         },
                     },
                 }}
-            />
-        </div>
+            /></AuthProvider>
+           
     );
 }
