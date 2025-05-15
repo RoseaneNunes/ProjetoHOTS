@@ -3,8 +3,8 @@ const router = express.Router();
 const pacienteController = require('../controllers/pacienteController');
 const { protegerRota } = require('../middleware/authMiddleware');
 
-router.post('/pacientes', protegerRota, pacienteController.criarPaciente);
-router.get('/pacientes', protegerRota, pacienteController.listarPacientes);
+router.post('/pacientes',  pacienteController.criarPaciente);
+router.get('/pacientes',  pacienteController.listarPacientes);
 router.get(
     '/pacientes/:cpf',
     protegerRota,

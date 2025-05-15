@@ -6,9 +6,9 @@ const { protegerRota } = require('../middleware/authMiddleware'); // Importar o 
 router.post('/agentes', agenteController.criarAgente);
 router.post('/agentes/login', agenteController.loginAgente);
 
-router.get('/agentes', protegerRota, agenteController.listarAgentes);
-router.get('/agentes/:id', protegerRota, agenteController.obterAgentePorId);
-router.put('/agentes/:id', protegerRota, agenteController.atualizarAgente);
-router.delete('/agentes/:id', protegerRota, agenteController.excluirAgente);
+router.get('/agentes', agenteController.listarAgentes);
+router.get('/agentes/:id', agenteController.obterAgentePorId);
+router.put('/agentes/:id',  agenteController.atualizarAgente);
+router.delete('/agentes/:id',  agenteController.excluirAgente);
 
 module.exports = router;
