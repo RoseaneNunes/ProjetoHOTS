@@ -51,7 +51,25 @@ exports.criarTarefa = async (req, res) => {
 
 exports.listarTarefas = async (req, res) => {
     try {
+        const { agente_id, paciente_cpf, status } = req.query;
+
+        // Construir objeto de filtro com base nos parâmetros fornecidos
+        const where = {};
+
+        if (agente_id) {
+            where.agente_id = parseInt(agente_id);
+        }
+
+        if (paciente_cpf) {
+            where.paciente_cpf = paciente_cpf;
+        }
+
+        if (status) {
+            where.status = status;
+        }
+
         const tarefas = await prisma.tarefa.findMany({
+            where,
             include: {
                 agente: true,
                 paciente: true,

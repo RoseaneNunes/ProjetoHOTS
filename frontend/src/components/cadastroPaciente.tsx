@@ -1,233 +1,397 @@
-import { PlusIcon } from "lucide-react";
+import { PlusIcon } from 'lucide-react';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { z } from "zod";
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
-import toast from "react-hot-toast";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { z } from 'zod';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const formatCPF = (value: string): string => {
+    if (!value) return value;
+
+    const cpf = value.replace(/\D/g, '');
+    const limitedCpf = cpf.slice(0, 11);
+
+    // Aplica a máscara
+    if (limitedCpf.length <= 3) return limitedCpf;
+    if (limitedCpf.length <= 6)
+        return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(3)}`;
+    if (limitedCpf.length <= 9)
+        return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(
+            3,
+            6
+        )}.${limitedCpf.slice(6)}`;
+    return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(
+        3,
+        6
+    )}.${limitedCpf.slice(6, 9)}-${limitedCpf.slice(9, 11)}`;
+};
 
 interface Microarea {
-  id: number;
-  nome: string;
-  descricao: string;
+    id: number;
+    nome: string;
+    descricao: string;
 }
 interface Agente {
-  id: number;
+    id: number;
+}
+
+interface CadastroDePacienteProps {
+    onPacienteCadastrado: () => void;
 }
 
 const pacienteSchema = z.object({
-  nome: z.string().nonempty("o nome é um campo obrigatorio"),
-  cpf: z.string().nonempty("o cpf é um campo obrigatorio"),
-  agente_id: z.number().min(1, "agente é um campo obrigatorio"),
-  endereco: z.string().nonempty("o endereço é obrigatorio"),
-  /*Rua: z.string().nonempty("rua é um campo obrigatorio"),
-    Numero: z
-      .number()
-      .nonnegative()
-      .min(1, "numero é um campo obrigatio não negativo"),
-    bairro: z.string().nonempty("bairro é um campo obrigatio"),*/
-  comorbidades: z.string(),
-  situação: z.string(),
-  microarea_id: z.number(),
+    nome: z.string().nonempty('O nome é um campo obrigatorio'),
+    cpf: z.string().nonempty('O CPF é um campo obrigatorio'),
+    endereco: z.string().nonempty('O endereço é obrigatorio'),
+    comorbidades: z.string(),
+    situação: z.string(),
+    microarea_id: z.number().min(1, 'A microárea é obrigatória'),
 });
 
 type pacienteSchema = z.infer<typeof pacienteSchema>;
 
-export function CadastroDePaciente() {
-  const [microareas, setMicroareas] = useState<Microarea[]>([]);
+export function CadastroDePaciente({
+    onPacienteCadastrado,
+}: CadastroDePacienteProps) {
+    const [microareas, setMicroareas] = useState<Microarea[]>([]);
+    const [agentIds, setAgentIds] = useState<number[]>([]);
+    const [open, setOpen] = useState(false);
 
-  const [agentIds, setAgentIds] = useState<number[]>([]);
+    useEffect(() => {
+        const fetchAgentes = async () => {
+            try {
+                const response = await api.get<Agente[]>(
+                    'http://localhost:3333/api/agentes'
+                );
+                const ids = response.data.map((agent) => agent.id);
+                setAgentIds(ids);
+            } catch (error) {
+                console.error('Erro ao carregar agentes:', error);
+            }
+        };
 
-  useEffect(() => {
-    const fetchAgentes = async () => {
-      try {
-        const response = await api.get<Agente[]>(
-          "http://localhost:3333/api/agentes"
-        );
-        const ids = response.data.map((agent) => agent.id);
-        setAgentIds(ids);
-      } catch (error) {
-        console.error("Erro ao carregar agentes:", error);
-      }
-    };
+        if (open) {
+            fetchAgentes();
+        }
+    }, [open]);
 
-    fetchAgentes();
-  }, []);
+    useEffect(() => {
+        const fetchMicroareas = async () => {
+            try {
+                const response = await api.get(
+                    'http://localhost:3333/api/microareas'
+                );
+                setMicroareas(response.data);
+            } catch (error) {
+                console.error('Erro ao carregar microáreas:', error);
+            }
+        };
 
-  useEffect(() => {
-    const fetchMicroareas = async () => {
-      try {
-        const response = await api.get("http://localhost:3333/api/microareas");
-        setMicroareas(response.data);
-      } catch (error) {
-        console.error("Erro ao carregar microáreas:", error);
-      }
-    };
+        if (open) {
+            fetchMicroareas();
+        }
+    }, [open]);
 
-    fetchMicroareas();
-  }, []);
+    const {
+        register, // register ainda pode ser usado para outros campos
+        handleSubmit,
+        control, // Usaremos control para o CPF
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<pacienteSchema>({
+        resolver: zodResolver(pacienteSchema),
+        defaultValues: {
+            nome: '',
+            cpf: '', // CPF começa vazio
+            agente_id: undefined,
+            endereco: '',
+            comorbidades: '',
+            situação: '',
+            microarea_id: undefined,
+        },
+    });
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors, isSubmitting },
-  } = useForm<pacienteSchema>({ resolver: zodResolver(pacienteSchema) });
+    async function handleRegiterUser(data: pacienteSchema) {
+        try {
+            console.log('Enviando dados:', data);
 
-  async function handleRegiterUser(data: pacienteSchema) {
-    try {
-      console.log("Enviando dados:", data);
+            // Certifique-se que IDs numéricos estão corretos antes de enviar
+            const payload = {
+                ...data,
+                microarea_id: Number(data.microarea_id),
+            };
 
-      const response = await api.post(
-        "http://localhost:3333/api/pacientes",
-        data
-      );
-      toast.success("paciente registrado com sucesso!");
-    } catch (error) {
-      console.error("erro completo:", error);
-      toast.error("ocorreu um erro ao criar um paciente " + error);
+            await api.post('/pacientes', payload);
+            toast.success('Paciente registrado com sucesso!');
+            onPacienteCadastrado();
+            setOpen(false);
+            reset();
+        } catch (error: any) {
+            console.error('Erro completo ao registrar paciente:', error);
+            if (
+                error.response &&
+                error.response.data &&
+                error.response.data.error
+            ) {
+                toast.error(error.response.data.error);
+            } else {
+                toast.error(
+                    'Ocorreu um erro ao criar o paciente. Tente novamente.'
+                );
+            }
+        }
     }
-  }
 
-  return (
-    <Dialog>
-      <DialogTrigger>
-        <PlusIcon className="inline bg-[#faae2b] rounded-4xl absolute top-0 -right-7 hover:ring-1 hover:ring-offset-4 hover:ring-[#faae2b] " />
-      </DialogTrigger>
-      <DialogContent>
-        <form onSubmit={handleSubmit(handleRegiterUser)}>
-          <DialogHeader>
-            <DialogTitle>Cadastro de paciente</DialogTitle>
-            <DialogDescription className=" grid gap-1">
-              preencha os campos a baixo:
-              <div className=" grid gap-2">
-                <Input
-                  className={` ${errors.nome ? "ring-2 ring-red-500" : ""}`}
-                  placeholder="Nome Completo"
-                  disabled={isSubmitting}
-                  {...register("nome")}
-                />
-                <Input
-                  className={` ${errors.cpf ? "ring-2 ring-red-500" : ""}`}
-                  placeholder="cpf"
-                  disabled={isSubmitting}
-                  {...register("cpf")}
-                />
-                <Controller
-                  name="agente_id"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      value={field.value ? String(field.value) : undefined}
-                      onValueChange={(value) => field.onChange(Number(value))}
-                    >
-                      <SelectTrigger
-                        className={`xl:w-[355px] w-[80vw] h-[5vh] md:w-[40vw] ${
-                          errors.agente_id ? "ring-2 ring-red-500" : ""
-                        }`}
-                      >
-                        <SelectValue placeholder="Selecione o id do agente" />
-                      </SelectTrigger>
-                      <SelectContent className="text-[#475d5b] shadow-2xs">
-                        <SelectGroup>
-                          {agentIds.map((id) => (
-                            <SelectItem
-                              key={id}
-                              value={String(id)}
-                              className="text-[#475d5b]"
-                            >
-                              {id}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              endereço:
-              <div className="grid gap-2  ">
-                <Input
-                  className={` ${errors.endereco ? "ring-2 ring-red-500" : ""}`}
-                  placeholder="Endereço"
-                  disabled={isSubmitting}
-                  {...register("endereco")}
-                />
-                <Controller
-                  name="microarea_id"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      value={field.value ? String(field.value) : undefined}
-                      onValueChange={(value) => field.onChange(Number(value))}
-                      disabled={isSubmitting} 
-                    >
-                      <SelectTrigger
-                        className={`xl:w-[355px] w-[80vw] h-[5vh]  md:w-[40vw] ${
-                          errors.microarea_id ? "ring-2 ring-red-500" : ""
-                        }`}
-                      >
-                        <SelectValue placeholder="Selecione a microárea" />
-                      </SelectTrigger>
-                      <SelectContent className="text-[#475d5b] shadow-2xs">
-                        <SelectGroup>
-                          {microareas.map((microarea) => (
-                            <SelectItem
-                              key={microarea.id}
-                              value={String(microarea.id)}
-                              className="text-[#475d5b] shadow-2xs"
-                            >
-                              {microarea.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              Saude:
-              <div className="grid gap-2">
-                <Input
-                  className={` ${
-                    errors.comorbidades ? "ring-2 ring-red-500" : ""
-                  }`}
-                  placeholder="comorbidades"
-                  disabled={isSubmitting}
-                  {...register("comorbidades")}
-                />
-                <Textarea placeholder="situação" {...register("situação")} />
-              </div>
-              <button
-                disabled={isSubmitting}
-                type="submit"
-                className="text-center bg-[#faae2b] text-[#fffffe] h-8  rounded-4xl hover:ring-2 "
-              >
-                {isSubmitting ? "Carregando..." : "Cadastrar paciente"}
-              </button>
-            </DialogDescription>
-          </DialogHeader>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+    const commonInputClassName =
+        'w-full h-10 px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-[#faae2b] focus:border-[#faae2b]';
+    const errorRingClassName = 'ring-2 ring-red-500 border-red-500';
+    const labelClassName = 'block text-sm font-medium text-gray-300 mb-1';
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <button className="bg-[#faae2b] rounded-full hover:ring-2 hover:ring-offset-2 hover:ring-offset-gray-800 hover:ring-[#faae2b]">
+                    <PlusIcon className="text-gray-900" size={24} />
+                </button>
+            </DialogTrigger>
+            <DialogContent className="bg-gray-800 text-white sm:max-w-lg p-6 max-h-[85vh] flex flex-col">
+                <DialogHeader className="mb-4 flex-shrink-0">
+                    <DialogTitle className="text-xl font-semibold text-center">
+                        Cadastro de paciente
+                    </DialogTitle>
+                    {/* <DialogDescription className="text-center text-gray-400">preencha os campos a baixo:</DialogDescription> */}
+                </DialogHeader>
+                <div className="flex-grow overflow-y-auto pr-2">
+                    <form
+                        onSubmit={handleSubmit(handleRegiterUser)}
+                        className="space-y-4">
+                        <div>
+                            <label htmlFor="nome" className={labelClassName}>
+                                Nome Completo
+                            </label>
+                            <Input
+                                id="nome"
+                                className={`${commonInputClassName} ${
+                                    errors.nome ? errorRingClassName : ''
+                                }`}
+                                placeholder="Nome Completo do Paciente"
+                                disabled={isSubmitting}
+                                {...register('nome')}
+                            />
+                            {errors.nome && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.nome.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="cpf" className={labelClassName}>
+                                CPF
+                            </label>
+                            <Controller
+                                name="cpf"
+                                control={control}
+                                render={({ field }) => (
+                                    <Input
+                                        id="cpf"
+                                        className={`${commonInputClassName} ${
+                                            errors.cpf ? errorRingClassName : ''
+                                        }`}
+                                        placeholder="000.000.000-00"
+                                        disabled={isSubmitting}
+                                        value={field.value}
+                                        onChange={(e) => {
+                                            const formattedCPF = formatCPF(
+                                                e.target.value
+                                            );
+                                            field.onChange(formattedCPF); // Atualiza o react-hook-form com o valor formatado
+                                        }}
+                                        maxLength={14} // Limita o número de caracteres visíveis (11 dígitos + 2 pontos + 1 traço)
+                                    />
+                                )}
+                            />
+                            {errors.cpf && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.cpf.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="pt-2">
+                            {/* Grupo de Endereço */}
+                            <h3 className="text-md font-semibold text-gray-300 mb-2">
+                                Endereço
+                            </h3>
+                            <div>
+                                <label
+                                    htmlFor="endereco"
+                                    className={labelClassName}>
+                                    Logradouro Completo
+                                </label>
+                                <Input
+                                    id="endereco"
+                                    className={`${commonInputClassName} ${
+                                        errors.endereco
+                                            ? errorRingClassName
+                                            : ''
+                                    }`}
+                                    placeholder="Rua, Número, Bairro, Complemento"
+                                    disabled={isSubmitting}
+                                    {...register('endereco')}
+                                />
+                                {errors.endereco && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.endereco.message}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="mt-4">
+                                <label
+                                    htmlFor="microarea_id"
+                                    className={labelClassName}>
+                                    Microárea
+                                </label>
+                                <Controller
+                                    name="microarea_id"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            value={
+                                                field.value
+                                                    ? String(field.value)
+                                                    : undefined
+                                            }
+                                            onValueChange={(value) =>
+                                                field.onChange(
+                                                    value
+                                                        ? Number(value)
+                                                        : undefined
+                                                )
+                                            }
+                                            disabled={isSubmitting}>
+                                            <SelectTrigger
+                                                id="microarea_id"
+                                                className={`${commonInputClassName} ${
+                                                    errors.microarea_id
+                                                        ? errorRingClassName
+                                                        : ''
+                                                }`}>
+                                                <SelectValue placeholder="Selecione a microárea" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-gray-700 text-white border-gray-600">
+                                                <SelectGroup>
+                                                    {microareas.map(
+                                                        (microarea) => (
+                                                            <SelectItem
+                                                                key={
+                                                                    microarea.id
+                                                                }
+                                                                value={String(
+                                                                    microarea.id
+                                                                )}>
+                                                                {microarea.nome}
+                                                            </SelectItem>
+                                                        )
+                                                    )}
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                                {errors.microarea_id && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.microarea_id.message}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="pt-2">
+                            {' '}
+                            {/* Grupo de Saúde */}
+                            <h3 className="text-md font-semibold text-gray-300 mb-2">
+                                Informações de Saúde
+                            </h3>
+                            <div>
+                                <label
+                                    htmlFor="comorbidades"
+                                    className={labelClassName}>
+                                    Comorbidades
+                                </label>
+                                <Input
+                                    id="comorbidades"
+                                    className={`${commonInputClassName} ${
+                                        errors.comorbidades
+                                            ? errorRingClassName
+                                            : ''
+                                    }`}
+                                    placeholder="Ex: Hipertensão, Diabetes"
+                                    disabled={isSubmitting}
+                                    {...register('comorbidades')}
+                                />
+                                {errors.comorbidades && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.comorbidades.message}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="mt-4">
+                                <label
+                                    htmlFor="situacao"
+                                    className={labelClassName}>
+                                    Situação do Paciente
+                                </label>
+                                <Textarea
+                                    id="situacao"
+                                    className={`${commonInputClassName} min-h-[80px] ${
+                                        errors.situação
+                                            ? errorRingClassName
+                                            : ''
+                                    }`} // min-h para Textarea
+                                    placeholder="Descreva a situação atual do paciente"
+                                    disabled={isSubmitting}
+                                    {...register('situação')}
+                                />
+                                {errors.situação && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.situação.message}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        <button
+                            disabled={isSubmitting}
+                            type="submit"
+                            className="w-full mt-6 h-11 flex-shrink-0 bg-[#faae2b] text-gray-900 font-semibold rounded-lg hover:bg-amber-500 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-gray-800 ">
+                            {isSubmitting
+                                ? 'Carregando...'
+                                : 'Cadastrar paciente'}
+                        </button>
+                    </form>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
 }

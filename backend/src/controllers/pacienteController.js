@@ -2,15 +2,22 @@ const prisma = require('../lib/prisma');
 
 exports.criarPaciente = async (req, res) => {
     try {
-        const {
-            cpf,
-            nome,
-            endereco,
-            comorbidades,
-            situacao,
-            agente_id,
-            microarea_id,
-        } = req.body;
+        const { cpf, nome, endereco, comorbidades, situacao, microarea_id } =
+            req.body;
+
+        let agente_id = null;
+        if (microarea_id) {
+            const agenteDaMicroarea = await prisma.agente.findFirst({
+                where: {
+                    microarea_id: microarea_id,
+                    cargo: 'AGT', // Garantir que é um agente, não um administrador
+                },
+            });
+
+            if (agenteDaMicroarea) {
+                agente_id = agenteDaMicroarea.id;
+            }
+        }
 
         const novoPaciente = await prisma.paciente.create({
             data: {
@@ -19,8 +26,8 @@ exports.criarPaciente = async (req, res) => {
                 endereco,
                 comorbidades,
                 situacao,
-                agente_id,
                 microarea_id,
+                agente_id,
             },
         });
 

@@ -1,0 +1,93 @@
+/* Garantir que botões da toolbar sejam clicáveis */
+.calendar-custom .rbc-toolbar button {
+    position: relative !important;
+    z-index: 9999 !important;
+    pointer-events: all !important;
+    cursor: pointer !important;
+    color: #333 !important;
+    background-color: #f2f7f5 !important;
+    border: 1px solid #ccc !important;
+    user-select: none !important;
+    transition: all 0.2s ease !important;
+}
+
+.calendar-custom .rbc-toolbar button:hover {
+    background-color: #e6e6e6 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.calendar-custom .rbc-toolbar button.rbc-active {
+    background-color: #faae2b !important;
+    color: #00473e !important;
+    font-weight: bold !important;
+}
+
+/* Garantir que a toolbar tenha altura suficiente */
+.calendar-custom .rbc-toolbar {
+    position: relative !important;
+    z-index: 9999 !important;
+    padding: 10px 5px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 10px !important;
+    pointer-events: all !important;
+}
+
+.calendar-custom .rbc-btn-group {
+    position: relative !important;
+    z-index: 9999 !important;
+    display: inline-flex !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    pointer-events: all !important;
+}
+
+/* Adicionar margem entre os grupos de botões em telas pequenas */
+@media (max-width: 768px) {
+    .calendar-custom .rbc-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .calendar-custom .rbc-toolbar-label {
+        margin: 8px 0;
+    }
+
+    .calendar-custom .rbc-btn-group {
+        margin-bottom: 8px;
+    }
+}
+
+/* Melhorar a visualização dos eventos */
+.calendar-custom .rbc-event {
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+
+/* Garantir que os elementos de navegação estejam visíveis e interativos */
+.calendar-custom .rbc-header,
+.calendar-custom .rbc-month-view,
+.calendar-custom .rbc-time-view,
+.calendar-custom .rbc-agenda-view {
+    z-index: 1;
+    position: relative;
+}
+
+.calendar-custom .rbc-header,
+.calendar-custom .rbc-month-view,
+.calendar-custom .rbc-time-view,
+.calendar-custom .rbc-agenda-view,
+.calendar-custom .rbc-month-row,
+.calendar-custom .rbc-date-cell,
+.calendar-custom .rbc-time-slot {
+    pointer-events: all !important;
+}
+
+/* Garantir que os popover de eventos não fiquem cobertos */
+.calendar-custom .rbc-overlay {
+    z-index: 10000 !important;
+}
