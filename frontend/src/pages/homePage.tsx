@@ -69,12 +69,12 @@ export default function HomePage() {
     };
 
     return (
-        <section className="bg-[#00473e] w-screen h-screen">
+        <section className="bg-[#00473e] w-screen h-screen max-lg:h-[150vh]">
             <Header />
-            <div className="flex flex-row h-[calc(100vh-var(--header-height,80px))] justify-center pt-7 gap-7">
-                {/* Coluna da Agenda */}
-                <div className="bg-[#f2f7f5] w-[25vw] rounded-3xl text-[#00332c] py-5 px-4 flex flex-col">
-                    <h1 className="bg-[#faae2b] w-32 h-8 flex items-center justify-center rounded-full mb-4">
+            <div className="flex flex-row h-[calc(100vh-var(--header-height,80px))] justify-center pt-7 gap-7 max-lg:grid">
+               
+                <div className="bg-[#f2f7f5] w-[25vw] rounded-3xl text-[#00332c] py-5 px-4 flex flex-col max-lg:w-[80vw]">
+                    <h1 className="bg-[#faae2b] w-32 h-8 flex items-center justify-center rounded-full mb-4 max-lg:text-lg">
                         Agenda
                     </h1>
                     <div className="flex-grow overflow-y-auto">
@@ -82,9 +82,9 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Coluna Central de Pacientes */}
-                <div className="bg-[#f2f7f5] w-[40vw] rounded-3xl text-[#00332c] py-5 px-4 flex flex-col items-center">
-                    <h1 className="bg-[#faae2b] w-32 h-8 flex items-center justify-center rounded-full mb-4">
+           
+                <div className="bg-[#f2f7f5] w-[40vw] rounded-3xl text-[#00332c] py-5 px-4 flex flex-col items-center max-lg:w-[80vw]">
+                    <h1 className="bg-[#faae2b] w-32 h-8 flex items-center justify-center rounded-full mb-4 max-lg:text-lg">
                         Pacientes
                     </h1>
                     <div className="w-full max-w-md mb-4 flex items-center justify-center gap-3">
@@ -101,7 +101,7 @@ export default function HomePage() {
                         </div>
                     </div>
                     <div className="w-full flex-grow overflow-y-auto">
-                        <Pacientecard
+                        <Pacientecard 
                             search={search}
                             pacientes={pacientes}
                             onPacienteAtualizado={handlePacienteAtualizado}
@@ -109,9 +109,9 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* Coluna do Mapa */}
-                <div className="bg-[#f2f7f5] w-[25vw] rounded-3xl text-[#00332c] py-5 px-4 flex flex-col">
-                    <h1 className="bg-[#faae2b] w-32 h-8 flex items-center justify-center rounded-full mb-4">
+              
+                <div className="bg-[#f2f7f5] w-[25vw] rounded-3xl text-[#00332c] py-5 px-4 flex flex-col max-lg:w-[80vw] max-lg:h-[50vh]">
+                    <h1 className="bg-[#faae2b] w-32 h-8 flex items-center justify-center rounded-full mb-4 max-lg:text-lg">
                         Mapa
                     </h1>
                     <div className="flex-grow">

@@ -12,7 +12,6 @@ import { toast } from 'react-hot-toast';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '@/context/contextAuth';
 
-// Corrigindo o problema dos ícones no Leaflet com Next.js
 const markerIcon = new Icon({
     iconUrl: '/marker-icon.png',
     iconRetinaUrl: '/marker-icon-2x.png',
@@ -52,18 +51,16 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
     const [rota, setRota] = useState<[number, number][]>([]);
     const [centroMapa, setCentroMapa] = useState<[number, number]>([
         -7.23069, -35.88125,
-    ]); // Centro em Campina Grande
+    ]);
     const [rotaOtimizada, setRotaOtimizada] = useState(false);
     const { user } = useAuth();
 
-    // Função para obter pacientes com coordenadas geográficas
     useEffect(() => {
         const buscarPacientes = async () => {
             try {
                 setCarregando(true);
                 const response = await api.get('/pacientes');
 
-                // Filtrar por microárea se necessário
                 let pacientesFiltrados = response.data;
 
                 if (user && user.cargo === 'AGT' && user.microarea_id) {
@@ -76,12 +73,8 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
                     );
                 }
 
-                // Converter endereços em coordenadas (geocoding)
-                // Aqui você usaria um serviço real de geocoding, mas para fins de demonstração
-                // vamos gerar coordenadas aleatórias próximas ao centro de Campina Grande
                 const pacientesComLocalizacao = pacientesFiltrados.map(
                     (p: any) => {
-                        // Gerar coordenadas aleatórias em torno do centro
                         const lat =
                             centroMapa[0] + (Math.random() - 0.5) * 0.05;
                         const lng =
@@ -97,7 +90,6 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
 
                 setPacientes(pacientesComLocalizacao);
 
-                // Se tiver pacientes, atualize o centro do mapa para o primeiro
                 if (pacientesComLocalizacao.length > 0) {
                     const primeiroPaciente = pacientesComLocalizacao[0];
                     setCentroMapa([primeiroPaciente.lat, primeiroPaciente.lng]);
@@ -113,25 +105,19 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
         buscarPacientes();
     }, [microareaId, user]);
 
-    // Gerar rota otimizada entre os pacientes (algoritmo simples)
     const gerarRota = () => {
         if (pacientes.length === 0) return;
 
-        // Ponto inicial (sede da unidade de saúde ou casa do agente)
         const pontoInicial: [number, number] = centroMapa;
 
-        // Lista de pontos (pacientes) para visitar
         const pontos = pacientes.map((p) => [p.lat, p.lng] as [number, number]);
 
-        // Algoritmo do vizinho mais próximo para otimizar a rota
-        // (algoritmo simples, não é o mais eficiente para muitos pontos)
         const rotaCalculada: [number, number][] = [pontoInicial];
         const pontosRestantes = [...pontos];
 
         while (pontosRestantes.length > 0) {
             const ultimoPonto = rotaCalculada[rotaCalculada.length - 1];
 
-            // Encontrar o ponto mais próximo
             let indiceMaisProximo = 0;
             let menorDistancia = calcularDistancia(
                 ultimoPonto,
@@ -149,14 +135,10 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
                 }
             }
 
-            // Adicionar o ponto mais próximo à rota
             rotaCalculada.push(pontosRestantes[indiceMaisProximo]);
-
-            // Remover o ponto da lista de pontos restantes
             pontosRestantes.splice(indiceMaisProximo, 1);
         }
 
-        // Voltar ao ponto inicial para completar o ciclo
         rotaCalculada.push(pontoInicial);
 
         setRota(rotaCalculada);
@@ -164,7 +146,6 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
         toast.success('Rota de visitas otimizada gerada!');
     };
 
-    // Função auxiliar para calcular distância entre dois pontos
     const calcularDistancia = (
         ponto1: [number, number],
         ponto2: [number, number]
@@ -172,12 +153,9 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
         const [lat1, lng1] = ponto1;
         const [lat2, lng2] = ponto2;
 
-        // Distância euclidiana simples (para fins de demonstração)
-        // Em produção, você poderia usar a fórmula de Haversine para distâncias geográficas
         return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
     };
 
-    // Limpar a rota
     const limparRota = () => {
         setRota([]);
         setRotaOtimizada(false);
@@ -223,7 +201,6 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
                         zoom={14}
                         style={{ height: '100%', width: '100%' }}
                         whenCreated={(map) => {
-                            // Ajustar zoom para incluir todos os marcadores
                             if (pacientes.length > 0) {
                                 const bounds = pacientes.reduce((bounds, p) => {
                                     bounds.extend([p.lat, p.lng]);
@@ -238,7 +215,6 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
 
-                        {/* Marcador para o ponto central (unidade de saúde ou casa do agente) */}
                         <Marker position={centroMapa} icon={homeIcon}>
                             <Popup>
                                 <div>
@@ -250,7 +226,6 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
                             </Popup>
                         </Marker>
 
-                        {/* Marcadores para cada paciente */}
                         {pacientes.map((paciente) => (
                             <Marker
                                 key={paciente.cpf}
@@ -279,7 +254,6 @@ export function MapaVisitas({ microareaId }: MapaVisitasProps) {
                             </Marker>
                         ))}
 
-                        {/* Linha da rota */}
                         {rota.length > 0 && (
                             <Polyline
                                 positions={rota}

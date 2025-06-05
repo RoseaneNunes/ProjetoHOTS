@@ -4,7 +4,7 @@ import { useAuth } from '@/context/contextAuth';
 
 export default function Home() {
     const router = useRouter();
-    const { isLoggedIn, isReady } = useAuth(); // Adicione isReady e token se necessário para lógica mais complexa
+    const { isLoggedIn, isReady } = useAuth(); 
 
     useEffect(() => {
         // Espera o AuthProvider estar pronto para evitar redirecionamentos prematuros

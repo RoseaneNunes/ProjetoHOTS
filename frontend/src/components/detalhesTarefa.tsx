@@ -20,7 +20,7 @@ interface DetalhesTarefaProps {
     onExcluir?: (id: number) => void;
 }
 
-// Reutilizar a interface EventoCalendario do componente calendario.tsx
+
 interface EventoCalendario {
     id: number;
     title: string;
@@ -49,7 +49,7 @@ export function DetalhesTarefa({
         return format(data, "PPP 'às' HH:mm", { locale: ptBR });
     };
 
-    // Função para definir a cor do badge de prioridade
+
     const getCorPrioridade = (prioridade: string) => {
         switch (prioridade.toLowerCase()) {
             case 'alta':
@@ -63,7 +63,7 @@ export function DetalhesTarefa({
         }
     };
 
-    // Função para definir a cor do badge de status
+    
     const getCorStatus = (status: string) => {
         switch (status.toLowerCase()) {
             case 'pendente':

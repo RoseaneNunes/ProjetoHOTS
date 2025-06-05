@@ -11,14 +11,14 @@ export default function AdminPage() {
     const router = useRouter();
 
     useEffect(() => {
-        // Verificar se o usuário está autenticado e é administrador
+      
         if (!isLoading && (!user || user.cargo !== 'ADM')) {
             toast.error('Acesso restrito a administradores');
             router.push('/');
         }
     }, [user, isLoading, router]);
 
-    // Se estiver carregando ou não for administrador, mostra tela de carregamento
+ 
     if (isLoading || !user || user.cargo !== 'ADM') {
         return (
             <div className="bg-[#00473e] min-h-screen flex flex-col">

@@ -24,14 +24,12 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-// Interfaces
 interface Microarea {
     id: number;
     nome: string;
     descricao: string | null;
 }
 
-// Schema para validação
 const microareaSchema = z.object({
     nome: z.string().nonempty('O nome é obrigatório'),
     descricao: z.string().optional().nullable(),
@@ -44,15 +42,12 @@ export function GerenciamentoMicroareas() {
     const [modalCadastroAberto, setModalCadastroAberto] = useState(false);
     const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
     const [modalExclusaoAberto, setModalExclusaoAberto] = useState(false);
-    const [microareaParaEditar, setMicroareaParaEditar] =
-        useState<Microarea | null>(null);
-    const [microareaParaExcluir, setMicroareaParaExcluir] =
-        useState<Microarea | null>(null);
+    const [microareaParaEditar, setMicroareaParaEditar] = useState<Microarea | null>(null);
+    const [microareaParaExcluir, setMicroareaParaExcluir] = useState<Microarea | null>(null);
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [excluindo, setExcluindo] = useState(false);
 
-    // Form para cadastro
     const {
         register: registerCadastro,
         handleSubmit: handleSubmitCadastro,
@@ -66,7 +61,6 @@ export function GerenciamentoMicroareas() {
         },
     });
 
-    // Form para edição
     const {
         register: registerEdicao,
         handleSubmit: handleSubmitEdicao,
@@ -81,7 +75,6 @@ export function GerenciamentoMicroareas() {
         },
     });
 
-    // Buscar microáreas
     const buscarMicroareas = async () => {
         try {
             setCarregando(true);
@@ -99,7 +92,6 @@ export function GerenciamentoMicroareas() {
         buscarMicroareas();
     }, []);
 
-    // Funções para cadastro
     const handleCadastrarMicroarea = async (data: MicroareaFormData) => {
         try {
             setSalvando(true);
@@ -120,7 +112,6 @@ export function GerenciamentoMicroareas() {
         }
     };
 
-    // Funções para edição
     const abrirModalEdicao = (microarea: Microarea) => {
         setMicroareaParaEditar(microarea);
         setValueEdicao('nome', microarea.nome);
@@ -150,7 +141,6 @@ export function GerenciamentoMicroareas() {
         }
     };
 
-    // Funções para exclusão
     const abrirModalExclusao = (microarea: Microarea) => {
         setMicroareaParaExcluir(microarea);
         setModalExclusaoAberto(true);
@@ -235,20 +225,14 @@ export function GerenciamentoMicroareas() {
                                             <Button
                                                 className="p-1 text-teal-600 hover:text-teal-800 hover:bg-gray-100 rounded-full"
                                                 size="icon"
-                                                onClick={() =>
-                                                    abrirModalEdicao(microarea)
-                                                }
+                                                onClick={() => abrirModalEdicao(microarea)}
                                                 title="Editar">
                                                 <Edit size={16} />
                                             </Button>
                                             <Button
                                                 variant="outline"
                                                 size="icon"
-                                                onClick={() =>
-                                                    abrirModalExclusao(
-                                                        microarea
-                                                    )
-                                                }
+                                                onClick={() => abrirModalExclusao(microarea)}
                                                 className="text-red-500 border-red-200 hover:text-red-700 hover:border-red-300"
                                                 title="Excluir">
                                                 <Trash2 size={16} />
@@ -262,22 +246,15 @@ export function GerenciamentoMicroareas() {
                 </div>
             )}
 
-            {/* Modal de Cadastro */}
-            <Dialog
-                open={modalCadastroAberto}
-                onOpenChange={setModalCadastroAberto}>
+           
+            <Dialog open={modalCadastroAberto} onOpenChange={setModalCadastroAberto}>
                 <DialogContent className="bg-gray-800 text-white sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-semibold text-center">
                             Cadastrar Nova Microárea
                         </DialogTitle>
                     </DialogHeader>
-
-                    <form
-                        onSubmit={handleSubmitCadastro(
-                            handleCadastrarMicroarea
-                        )}
-                        className="space-y-4 py-4">
+                    <form onSubmit={handleSubmitCadastro(handleCadastrarMicroarea)} className="space-y-4 py-4">
                         <div>
                             <label htmlFor="nome" className={labelClassName}>
                                 Nome da Microárea
@@ -286,11 +263,7 @@ export function GerenciamentoMicroareas() {
                                 id="nome"
                                 placeholder="Ex: Centro, Zona Norte, etc."
                                 {...registerCadastro('nome')}
-                                className={`${commonInputClassName} ${
-                                    errorsCadastro.nome
-                                        ? errorRingClassName
-                                        : ''
-                                }`}
+                                className={`${commonInputClassName} ${errorsCadastro.nome ? errorRingClassName : ''}`}
                             />
                             {errorsCadastro.nome && (
                                 <p className="text-red-500 text-xs mt-1">
@@ -298,11 +271,8 @@ export function GerenciamentoMicroareas() {
                                 </p>
                             )}
                         </div>
-
                         <div>
-                            <label
-                                htmlFor="descricao"
-                                className={labelClassName}>
+                            <label htmlFor="descricao" className={labelClassName}>
                                 Descrição
                             </label>
                             <Textarea
@@ -312,7 +282,6 @@ export function GerenciamentoMicroareas() {
                                 className={`${commonInputClassName} min-h-[80px]`}
                             />
                         </div>
-
                         <DialogFooter className="mt-6">
                             <Button
                                 type="button"
@@ -332,33 +301,24 @@ export function GerenciamentoMicroareas() {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal de Edição */}
-            <Dialog
-                open={modalEdicaoAberto}
-                onOpenChange={setModalEdicaoAberto}>
+         
+            <Dialog open={modalEdicaoAberto} onOpenChange={setModalEdicaoAberto}>
                 <DialogContent className="bg-gray-800 text-white sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-semibold text-center">
                             Editar Microárea
                         </DialogTitle>
                     </DialogHeader>
-
-                    <form
-                        onSubmit={handleSubmitEdicao(handleEditarMicroarea)}
-                        className="space-y-4 py-4">
+                    <form onSubmit={handleSubmitEdicao(handleEditarMicroarea)} className="space-y-4 py-4">
                         <div>
-                            <label
-                                htmlFor="nome-edicao"
-                                className={labelClassName}>
+                            <label htmlFor="nome-edicao" className={labelClassName}>
                                 Nome da Microárea
                             </label>
                             <Input
                                 id="nome-edicao"
                                 placeholder="Ex: Centro, Zona Norte, etc."
                                 {...registerEdicao('nome')}
-                                className={`${commonInputClassName} ${
-                                    errorsEdicao.nome ? errorRingClassName : ''
-                                }`}
+                                className={`${commonInputClassName} ${errorsEdicao.nome ? errorRingClassName : ''}`}
                             />
                             {errorsEdicao.nome && (
                                 <p className="text-red-500 text-xs mt-1">
@@ -366,11 +326,8 @@ export function GerenciamentoMicroareas() {
                                 </p>
                             )}
                         </div>
-
                         <div>
-                            <label
-                                htmlFor="descricao-edicao"
-                                className={labelClassName}>
+                            <label htmlFor="descricao-edicao" className={labelClassName}>
                                 Descrição
                             </label>
                             <Textarea
@@ -380,7 +337,6 @@ export function GerenciamentoMicroareas() {
                                 className={`${commonInputClassName} min-h-[80px]`}
                             />
                         </div>
-
                         <DialogFooter className="mt-6">
                             <Button
                                 type="button"
@@ -400,10 +356,8 @@ export function GerenciamentoMicroareas() {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal de Exclusão */}
-            <Dialog
-                open={modalExclusaoAberto}
-                onOpenChange={setModalExclusaoAberto}>
+         
+            <Dialog open={modalExclusaoAberto} onOpenChange={setModalExclusaoAberto}>
                 <DialogContent className="bg-gray-800 text-white sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-red-600">
@@ -411,7 +365,6 @@ export function GerenciamentoMicroareas() {
                             Confirmar exclusão
                         </DialogTitle>
                     </DialogHeader>
-
                     <div className="py-4">
                         <p className="text-gray-300">
                             Tem certeza que deseja excluir a microárea{' '}
@@ -421,12 +374,9 @@ export function GerenciamentoMicroareas() {
                             ?
                         </p>
                         <p className="text-sm text-gray-400 mt-2">
-                            Esta ação não pode ser desfeita. Todos os agentes e
-                            pacientes desta microárea ficarão sem microárea
-                            atribuída.
+                            Esta ação não pode ser desfeita. Todos os agentes e pacientes desta microárea ficarão sem microárea atribuída.
                         </p>
                     </div>
-
                     <DialogFooter>
                         <Button
                             type="button"

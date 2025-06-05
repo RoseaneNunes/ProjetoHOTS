@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/contextAuth';
-import { EditIcon } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -23,13 +22,11 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
-// Interface para pacientes (para o select)
 interface Paciente {
     cpf: string;
     nome: string;
 }
 
-// Interface para a tarefa a ser editada
 interface Tarefa {
     id: number;
     titulo: string;
@@ -42,7 +39,6 @@ interface Tarefa {
     agente_id?: number | null;
 }
 
-// Interface para props do componente
 interface EditarTarefaProps {
     tarefaId: number | null;
     aberto: boolean;
@@ -50,7 +46,6 @@ interface EditarTarefaProps {
     onTarefaEditada: () => void;
 }
 
-// Schema de validação com Zod
 const tarefaSchema = z.object({
     titulo: z.string().nonempty('O título é obrigatório'),
     descricao: z.string().optional().nullable(),
@@ -88,35 +83,31 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
         },
     });
 
-    // Buscar dados da tarefa quando o modal abrir
     useEffect(() => {
         const buscarTarefa = async () => {
             if (!tarefaId || !aberto) return;
-            
+
             try {
                 setCarregando(true);
                 const response = await api.get<Tarefa>(`/tarefas/${tarefaId}`);
                 const tarefa = response.data;
-                
-                // Preencher o formulário com os dados da tarefa
+
                 setValue('titulo', tarefa.titulo);
                 setValue('descricao', tarefa.descricao || '');
                 setValue('status', tarefa.status);
                 setValue('prioridade', tarefa.prioridade);
-                
-                // Formatar a data para o input datetime-local
+
                 if (tarefa.data_limite) {
                     const dataLimite = new Date(tarefa.data_limite);
-                    const dataFormatada = dataLimite.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
+                    const dataFormatada = dataLimite.toISOString().slice(0, 16);
                     setValue('data_limite', dataFormatada);
                 } else {
                     setValue('data_limite', null);
                 }
-                
+
                 setValue('tipo', tarefa.tipo || '');
                 setValue('paciente_cpf', tarefa.paciente_cpf || '');
-                
-                // Buscar pacientes para o select
+
                 buscarPacientes();
             } catch (error) {
                 console.error('Erro ao buscar tarefa:', error);
@@ -126,23 +117,21 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                 setCarregando(false);
             }
         };
-        
+
         buscarTarefa();
     }, [tarefaId, aberto, setValue]);
 
-    // Buscar pacientes para o select
     const buscarPacientes = async () => {
         try {
             const response = await api.get<Paciente[]>('/pacientes');
             let pacientesFiltrados = response.data;
-            
-            // Se o usuário for agente, filtrar pacientes dele
+
             if (user?.cargo === 'AGT' && user?.id) {
                 pacientesFiltrados = pacientesFiltrados.filter(
                     (p) => p.agente_id === user.id
                 );
             }
-            
+
             setPacientes(pacientesFiltrados);
         } catch (error) {
             console.error('Erro ao buscar pacientes:', error);
@@ -150,10 +139,9 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
         }
     };
 
-    // Função para editar a tarefa
     const handleEditarTarefa = async (data: TarefaSchema) => {
         if (!tarefaId) return;
-        
+
         try {
             await api.put(`/tarefas/${tarefaId}`, data);
             toast.success('Tarefa atualizada com sucesso!');
@@ -169,7 +157,6 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
         }
     };
 
-    // Estilos comuns
     const commonInputClassName = 'w-full h-10 px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-[#faae2b] focus:border-[#faae2b]';
     const errorRingClassName = 'ring-2 ring-red-500 border-red-500';
     const labelClassName = 'block text-sm font-medium text-gray-300 mb-1';
@@ -182,7 +169,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                         Editar Tarefa
                     </DialogTitle>
                 </DialogHeader>
-                
+
                 {carregando ? (
                     <div className="flex justify-center items-center py-8">
                         <p>Carregando dados da tarefa...</p>
@@ -190,7 +177,6 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                 ) : (
                     <div className="flex-grow overflow-y-auto pr-2">
                         <form onSubmit={handleSubmit(handleEditarTarefa)} className="space-y-4 mt-4">
-                            {/* Título */}
                             <div>
                                 <label htmlFor="titulo" className={labelClassName}>
                                     Título da Tarefa
@@ -208,8 +194,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                     </p>
                                 )}
                             </div>
-                            
-                            {/* Descrição */}
+
                             <div>
                                 <label htmlFor="descricao" className={labelClassName}>
                                     Descrição
@@ -222,8 +207,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                     {...register('descricao')}
                                 />
                             </div>
-                            
-                            {/* Status */}
+
                             <div>
                                 <label htmlFor="status" className={labelClassName}>
                                     Status
@@ -237,10 +221,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                             onValueChange={field.onChange}
                                             disabled={isSubmitting}
                                         >
-                                            <SelectTrigger
-                                                id="status"
-                                                className={commonInputClassName}
-                                            >
+                                            <SelectTrigger id="status" className={commonInputClassName}>
                                                 <SelectValue placeholder="Selecione o status" />
                                             </SelectTrigger>
                                             <SelectContent className="bg-gray-700 text-white border-gray-600">
@@ -255,8 +236,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                     )}
                                 />
                             </div>
-                            
-                            {/* Prioridade */}
+
                             <div>
                                 <label htmlFor="prioridade" className={labelClassName}>
                                     Prioridade
@@ -270,10 +250,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                             onValueChange={field.onChange}
                                             disabled={isSubmitting}
                                         >
-                                            <SelectTrigger
-                                                id="prioridade"
-                                                className={commonInputClassName}
-                                            >
+                                            <SelectTrigger id="prioridade" className={commonInputClassName}>
                                                 <SelectValue placeholder="Selecione a prioridade" />
                                             </SelectTrigger>
                                             <SelectContent className="bg-gray-700 text-white border-gray-600">
@@ -287,8 +264,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                     )}
                                 />
                             </div>
-                            
-                            {/* Data Limite */}
+
                             <div>
                                 <label htmlFor="data_limite" className={labelClassName}>
                                     Data Limite
@@ -301,8 +277,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                     {...register('data_limite')}
                                 />
                             </div>
-                            
-                            {/* Tipo */}
+
                             <div>
                                 <label htmlFor="tipo" className={labelClassName}>
                                     Tipo de Tarefa
@@ -316,10 +291,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                             onValueChange={field.onChange}
                                             disabled={isSubmitting}
                                         >
-                                            <SelectTrigger
-                                                id="tipo"
-                                                className={commonInputClassName}
-                                            >
+                                            <SelectTrigger id="tipo" className={commonInputClassName}>
                                                 <SelectValue placeholder="Selecione o tipo" />
                                             </SelectTrigger>
                                             <SelectContent className="bg-gray-700 text-white border-gray-600">
@@ -335,8 +307,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                     )}
                                 />
                             </div>
-                            
-                            {/* Paciente */}
+
                             <div>
                                 <label htmlFor="paciente_cpf" className={labelClassName}>
                                     Paciente Relacionado
@@ -350,10 +321,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                             onValueChange={field.onChange}
                                             disabled={isSubmitting}
                                         >
-                                            <SelectTrigger
-                                                id="paciente_cpf"
-                                                className={commonInputClassName}
-                                            >
+                                            <SelectTrigger id="paciente_cpf" className={commonInputClassName}>
                                                 <SelectValue placeholder="Selecione um paciente (opcional)" />
                                             </SelectTrigger>
                                             <SelectContent className="bg-gray-700 text-white border-gray-600">
@@ -369,8 +337,7 @@ export function EditarTarefa({ tarefaId, aberto, onFechar, onTarefaEditada }: Ed
                                     )}
                                 />
                             </div>
-                            
-                            {/* Botões */}
+
                             <div className="flex justify-end space-x-2 pt-4">
                                 <button
                                     type="button"

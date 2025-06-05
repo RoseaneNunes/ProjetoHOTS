@@ -19,6 +19,7 @@ import { useAuth } from '@/context/contextAuth';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button } from './ui/button';
+import { Profile } from './profile';
 
 export function Header() {
     const router = useRouter();
@@ -74,7 +75,7 @@ export function Header() {
             </div>
 
             <div className="flex items-center gap-2">
-                {/* Nome do usuário e cargo (apenas em telas maiores) */}
+               
                 <div className="hidden md:flex flex-col items-end">
                     <span className="text-sm font-medium text-[#00473e]">
                         {user?.nome || 'Usuário'}
@@ -112,19 +113,14 @@ export function Header() {
                         <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
                         <DropdownMenuSeparator />
 
-                        <DropdownMenuItem
-                            onClick={() => router.push('/perfil')}
-                            className="cursor-pointer">
-                            <UserIcon className="mr-2 h-4 w-4" />
-                            <span>Perfil</span>
-                        </DropdownMenuItem>
+            
 
-                        <DropdownMenuItem
+                        {/* <DropdownMenuItem
                             onClick={() => router.push('/configuracoes')}
                             className="cursor-pointer">
                             <Settings className="mr-2 h-4 w-4" />
                             <span>Configurações</span>
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
 
                         <DropdownMenuSeparator />
 

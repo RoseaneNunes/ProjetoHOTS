@@ -2,7 +2,6 @@ import { PlusIcon } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -12,7 +11,6 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
@@ -27,23 +25,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 const formatCPF = (value: string): string => {
     if (!value) return value;
-
     const cpf = value.replace(/\D/g, '');
     const limitedCpf = cpf.slice(0, 11);
-
-    // Aplica a máscara
     if (limitedCpf.length <= 3) return limitedCpf;
-    if (limitedCpf.length <= 6)
-        return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(3)}`;
+    if (limitedCpf.length <= 6) return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(3)}`;
     if (limitedCpf.length <= 9)
-        return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(
-            3,
-            6
-        )}.${limitedCpf.slice(6)}`;
-    return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(
-        3,
-        6
-    )}.${limitedCpf.slice(6, 9)}-${limitedCpf.slice(9, 11)}`;
+        return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(3, 6)}.${limitedCpf.slice(6)}`;
+    return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(3, 6)}.${limitedCpf.slice(6, 9)}-${limitedCpf.slice(9, 11)}`;
 };
 
 interface Microarea {
@@ -70,9 +58,7 @@ const pacienteSchema = z.object({
 
 type pacienteSchema = z.infer<typeof pacienteSchema>;
 
-export function CadastroDePaciente({
-    onPacienteCadastrado,
-}: CadastroDePacienteProps) {
+export function CadastroDePaciente({ onPacienteCadastrado }: CadastroDePacienteProps) {
     const [microareas, setMicroareas] = useState<Microarea[]>([]);
     const [agentIds, setAgentIds] = useState<number[]>([]);
     const [open, setOpen] = useState(false);
@@ -80,16 +66,13 @@ export function CadastroDePaciente({
     useEffect(() => {
         const fetchAgentes = async () => {
             try {
-                const response = await api.get<Agente[]>(
-                    'http://localhost:3333/api/agentes'
-                );
+                const response = await api.get<Agente[]>('http://localhost:3333/api/agentes');
                 const ids = response.data.map((agent) => agent.id);
                 setAgentIds(ids);
             } catch (error) {
                 console.error('Erro ao carregar agentes:', error);
             }
         };
-
         if (open) {
             fetchAgentes();
         }
@@ -98,32 +81,28 @@ export function CadastroDePaciente({
     useEffect(() => {
         const fetchMicroareas = async () => {
             try {
-                const response = await api.get(
-                    'http://localhost:3333/api/microareas'
-                );
+                const response = await api.get('http://localhost:3333/api/microareas');
                 setMicroareas(response.data);
             } catch (error) {
                 console.error('Erro ao carregar microáreas:', error);
             }
         };
-
         if (open) {
             fetchMicroareas();
         }
     }, [open]);
 
     const {
-        register, // register ainda pode ser usado para outros campos
+        register,
         handleSubmit,
-        control, // Usaremos control para o CPF
+        control,
         reset,
         formState: { errors, isSubmitting },
     } = useForm<pacienteSchema>({
         resolver: zodResolver(pacienteSchema),
         defaultValues: {
             nome: '',
-            cpf: '', // CPF começa vazio
-            agente_id: undefined,
+            cpf: '',
             endereco: '',
             comorbidades: '',
             situação: '',
@@ -133,14 +112,10 @@ export function CadastroDePaciente({
 
     async function handleRegiterUser(data: pacienteSchema) {
         try {
-            console.log('Enviando dados:', data);
-
-            // Certifique-se que IDs numéricos estão corretos antes de enviar
             const payload = {
                 ...data,
                 microarea_id: Number(data.microarea_id),
             };
-
             await api.post('/pacientes', payload);
             toast.success('Paciente registrado com sucesso!');
             onPacienteCadastrado();
@@ -148,16 +123,10 @@ export function CadastroDePaciente({
             reset();
         } catch (error: any) {
             console.error('Erro completo ao registrar paciente:', error);
-            if (
-                error.response &&
-                error.response.data &&
-                error.response.data.error
-            ) {
+            if (error.response && error.response.data && error.response.data.error) {
                 toast.error(error.response.data.error);
             } else {
-                toast.error(
-                    'Ocorreu um erro ao criar o paciente. Tente novamente.'
-                );
+                toast.error('Ocorreu um erro ao criar o paciente. Tente novamente.');
             }
         }
     }
@@ -179,29 +148,22 @@ export function CadastroDePaciente({
                     <DialogTitle className="text-xl font-semibold text-center">
                         Cadastro de paciente
                     </DialogTitle>
-                    {/* <DialogDescription className="text-center text-gray-400">preencha os campos a baixo:</DialogDescription> */}
                 </DialogHeader>
                 <div className="flex-grow overflow-y-auto pr-2">
-                    <form
-                        onSubmit={handleSubmit(handleRegiterUser)}
-                        className="space-y-4">
+                    <form onSubmit={handleSubmit(handleRegiterUser)} className="space-y-4">
                         <div>
                             <label htmlFor="nome" className={labelClassName}>
                                 Nome Completo
                             </label>
                             <Input
                                 id="nome"
-                                className={`${commonInputClassName} ${
-                                    errors.nome ? errorRingClassName : ''
-                                }`}
+                                className={`${commonInputClassName} ${errors.nome ? errorRingClassName : ''}`}
                                 placeholder="Nome Completo do Paciente"
                                 disabled={isSubmitting}
                                 {...register('nome')}
                             />
                             {errors.nome && (
-                                <p className="text-red-500 text-xs mt-1">
-                                    {errors.nome.message}
-                                </p>
+                                <p className="text-red-500 text-xs mt-1">{errors.nome.message}</p>
                             )}
                         </div>
 
@@ -215,46 +177,33 @@ export function CadastroDePaciente({
                                 render={({ field }) => (
                                     <Input
                                         id="cpf"
-                                        className={`${commonInputClassName} ${
-                                            errors.cpf ? errorRingClassName : ''
-                                        }`}
+                                        className={`${commonInputClassName} ${errors.cpf ? errorRingClassName : ''}`}
                                         placeholder="000.000.000-00"
                                         disabled={isSubmitting}
                                         value={field.value}
                                         onChange={(e) => {
-                                            const formattedCPF = formatCPF(
-                                                e.target.value
-                                            );
-                                            field.onChange(formattedCPF); // Atualiza o react-hook-form com o valor formatado
+                                            const formattedCPF = formatCPF(e.target.value);
+                                            field.onChange(formattedCPF);
                                         }}
-                                        maxLength={14} // Limita o número de caracteres visíveis (11 dígitos + 2 pontos + 1 traço)
+                                        maxLength={14}
                                     />
                                 )}
                             />
                             {errors.cpf && (
-                                <p className="text-red-500 text-xs mt-1">
-                                    {errors.cpf.message}
-                                </p>
+                                <p className="text-red-500 text-xs mt-1">{errors.cpf.message}</p>
                             )}
                         </div>
 
                         <div className="pt-2">
-                            {/* Grupo de Endereço */}
-                            <h3 className="text-md font-semibold text-gray-300 mb-2">
-                                Endereço
-                            </h3>
+                            <h3 className="text-md font-semibold text-gray-300 mb-2">Endereço</h3>
                             <div>
-                                <label
-                                    htmlFor="endereco"
-                                    className={labelClassName}>
+                                <label htmlFor="endereco" className={labelClassName}>
                                     Logradouro Completo
                                 </label>
                                 <Input
                                     id="endereco"
                                     className={`${commonInputClassName} ${
-                                        errors.endereco
-                                            ? errorRingClassName
-                                            : ''
+                                        errors.endereco ? errorRingClassName : ''
                                     }`}
                                     placeholder="Rua, Número, Bairro, Complemento"
                                     disabled={isSubmitting}
@@ -267,9 +216,7 @@ export function CadastroDePaciente({
                                 )}
                             </div>
                             <div className="mt-4">
-                                <label
-                                    htmlFor="microarea_id"
-                                    className={labelClassName}>
+                                <label htmlFor="microarea_id" className={labelClassName}>
                                     Microárea
                                 </label>
                                 <Controller
@@ -277,16 +224,10 @@ export function CadastroDePaciente({
                                     control={control}
                                     render={({ field }) => (
                                         <Select
-                                            value={
-                                                field.value
-                                                    ? String(field.value)
-                                                    : undefined
-                                            }
-                                            onValueChange={(value) =>
+                                            value={field.value ? String(field.value) : undefined}
+                                            onValueChange={(value:string) =>
                                                 field.onChange(
-                                                    value
-                                                        ? Number(value)
-                                                        : undefined
+                                                    value ? Number(value) : undefined
                                                 )
                                             }
                                             disabled={isSubmitting}>
@@ -301,19 +242,13 @@ export function CadastroDePaciente({
                                             </SelectTrigger>
                                             <SelectContent className="bg-gray-700 text-white border-gray-600">
                                                 <SelectGroup>
-                                                    {microareas.map(
-                                                        (microarea) => (
-                                                            <SelectItem
-                                                                key={
-                                                                    microarea.id
-                                                                }
-                                                                value={String(
-                                                                    microarea.id
-                                                                )}>
-                                                                {microarea.nome}
-                                                            </SelectItem>
-                                                        )
-                                                    )}
+                                                    {microareas.map((microarea) => (
+                                                        <SelectItem
+                                                            key={microarea.id}
+                                                            value={String(microarea.id)}>
+                                                            {microarea.nome}
+                                                        </SelectItem>
+                                                    ))}
                                                 </SelectGroup>
                                             </SelectContent>
                                         </Select>
@@ -328,23 +263,17 @@ export function CadastroDePaciente({
                         </div>
 
                         <div className="pt-2">
-                            {' '}
-                            {/* Grupo de Saúde */}
                             <h3 className="text-md font-semibold text-gray-300 mb-2">
                                 Informações de Saúde
                             </h3>
                             <div>
-                                <label
-                                    htmlFor="comorbidades"
-                                    className={labelClassName}>
+                                <label htmlFor="comorbidades" className={labelClassName}>
                                     Comorbidades
                                 </label>
                                 <Input
                                     id="comorbidades"
                                     className={`${commonInputClassName} ${
-                                        errors.comorbidades
-                                            ? errorRingClassName
-                                            : ''
+                                        errors.comorbidades ? errorRingClassName : ''
                                     }`}
                                     placeholder="Ex: Hipertensão, Diabetes"
                                     disabled={isSubmitting}
@@ -357,18 +286,14 @@ export function CadastroDePaciente({
                                 )}
                             </div>
                             <div className="mt-4">
-                                <label
-                                    htmlFor="situacao"
-                                    className={labelClassName}>
+                                <label htmlFor="situacao" className={labelClassName}>
                                     Situação do Paciente
                                 </label>
                                 <Textarea
                                     id="situacao"
                                     className={`${commonInputClassName} min-h-[80px] ${
-                                        errors.situação
-                                            ? errorRingClassName
-                                            : ''
-                                    }`} // min-h para Textarea
+                                        errors.situação ? errorRingClassName : ''
+                                    }`}
                                     placeholder="Descreva a situação atual do paciente"
                                     disabled={isSubmitting}
                                     {...register('situação')}
@@ -385,9 +310,7 @@ export function CadastroDePaciente({
                             disabled={isSubmitting}
                             type="submit"
                             className="w-full mt-6 h-11 flex-shrink-0 bg-[#faae2b] text-gray-900 font-semibold rounded-lg hover:bg-amber-500 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-gray-800 ">
-                            {isSubmitting
-                                ? 'Carregando...'
-                                : 'Cadastrar paciente'}
+                            {isSubmitting ? 'Carregando...' : 'Cadastrar paciente'}
                         </button>
                     </form>
                 </div>

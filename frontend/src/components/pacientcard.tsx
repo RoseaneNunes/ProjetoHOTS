@@ -95,7 +95,6 @@ export function Pacientecard({
         return format(data, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
     };
 
-    // Função para obter a cor baseada na prioridade
     const getCorPrioridade = (prioridade: string) => {
         switch (prioridade.toLowerCase()) {
             case 'alta':
@@ -109,7 +108,6 @@ export function Pacientecard({
         }
     };
 
-    // Função para obter a cor baseada no status
     const getCorStatus = (status: string) => {
         switch (status.toLowerCase()) {
             case 'pendente':
@@ -126,7 +124,6 @@ export function Pacientecard({
         }
     };
 
-    // Função para buscar tarefas de um paciente
     const buscarTarefasDoPaciente = async (cpf: string) => {
         try {
             const response = await api.get<Tarefa[]>(
@@ -141,9 +138,7 @@ export function Pacientecard({
         }
     };
 
-    // Função para alternar a expansão do card
     const toggleExpansao = (cpf: string) => {
-        // Se não existirem tarefas para este paciente, buscar
         if (!tarefasPorPaciente[cpf]) {
             buscarTarefasDoPaciente(cpf);
         }
@@ -154,19 +149,16 @@ export function Pacientecard({
         }));
     };
 
-    // Função para abrir o modal de edição
     const editarPaciente = (cpf: string) => {
         setPacienteCpfParaEditar(cpf);
         setModoEdicao(true);
     };
 
-    // Função para confirmar exclusão
     const confirmarExclusao = (paciente: Paciente) => {
         setPacienteParaExcluir(paciente);
         setExclusaoDialogAberto(true);
     };
 
-    // Função para excluir paciente
     const excluirPaciente = async () => {
         if (!pacienteParaExcluir) return;
 
@@ -175,7 +167,7 @@ export function Pacientecard({
             await api.delete(`/pacientes/${pacienteParaExcluir.cpf}`);
             toast.success('Paciente excluído com sucesso!');
             setExclusaoDialogAberto(false);
-            onPacienteAtualizado(); // Atualizar lista de pacientes
+            onPacienteAtualizado();
         } catch (error: any) {
             console.error('Erro ao excluir paciente:', error);
             if (error.response?.data?.error) {
@@ -210,7 +202,7 @@ export function Pacientecard({
                 {pacientesFiltrados.map((paciente) => (
                     <div
                         key={paciente.cpf}
-                        className="p-4 bg-white w-[38vw] shadow-md rounded-xl text-gray-700">
+                        className="p-4 bg-white w-[38vw] shadow-md rounded-xl text-gray-700 max-lg:w-[70vw]">
                         <div className="flex justify-between items-start">
                             <h2 className="text-lg font-bold text-teal-700 mb-2">
                                 Paciente
@@ -255,8 +247,6 @@ export function Pacientecard({
                             <strong>Microárea:</strong>{' '}
                             {paciente.microarea?.nome || 'Não atribuída'}
                         </p>
-
-                        {/* Botão para expandir/colapsar as tarefas */}
                         <button
                             onClick={() => toggleExpansao(paciente.cpf)}
                             className="mt-3 flex items-center gap-1 text-teal-700 hover:text-teal-900 font-medium">
@@ -268,8 +258,6 @@ export function Pacientecard({
                                 <ChevronDown size={16} />
                             )}
                         </button>
-
-                        {/* Lista de tarefas expandível */}
                         {expandido[paciente.cpf] && (
                             <div className="mt-2 border-t pt-2">
                                 {!tarefasPorPaciente[paciente.cpf] ? (
@@ -347,8 +335,6 @@ export function Pacientecard({
                     </div>
                 ))}
             </div>
-
-            {/* Modal de edição de paciente */}
             <EditarPaciente
                 cpf={pacienteCpfParaEditar}
                 aberto={modoEdicao}
@@ -360,8 +346,6 @@ export function Pacientecard({
                     onPacienteAtualizado();
                 }}
             />
-
-            {/* Diálogo de confirmação de exclusão */}
             <Dialog
                 open={exclusaoDialogAberto}
                 onOpenChange={setExclusaoDialogAberto}>
@@ -377,7 +361,6 @@ export function Pacientecard({
                             ação não pode ser desfeita.
                         </DialogDescription>
                     </DialogHeader>
-
                     <div className="py-3">
                         <p className="text-gray-700">
                             Todas as informações do paciente serão removidas
@@ -395,7 +378,6 @@ export function Pacientecard({
                             </div>
                         )}
                     </div>
-
                     <DialogFooter className="flex justify-end space-x-2">
                         <Button
                             onClick={() => setExclusaoDialogAberto(false)}

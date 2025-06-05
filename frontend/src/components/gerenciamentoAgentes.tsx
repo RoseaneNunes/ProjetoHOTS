@@ -32,7 +32,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/context/contextAuth';
 
-// Interfaces
+
 interface Agente {
     id: number;
     nome: string;
@@ -50,40 +50,70 @@ interface Microarea {
     nome: string;
 }
 
-// Schema para validação de cadastro
+
 const agenteCadastroSchema = z.object({
     nome: z.string().nonempty('O nome é obrigatório'),
     email: z.string().email('Email inválido').nonempty('O email é obrigatório'),
     senha: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
-    cargo: z.string().nonempty('O cargo é obrigatório'),
-    microarea_id: z.string().refine(
-        (value, ctx) => {
-            // Se for administrador (ADM), microárea é opcional
-            if (ctx.parent.cargo === 'ADM') return true;
-            // Para agentes (AGT), microárea é obrigatória e não pode ser "null"
-            return value && value !== 'null';
-        },
-        {
-            message: 'Agentes de saúde devem estar associados a uma microárea',
+   cargo: z.enum(['AGT', 'ADM'], {
+            required_error: 'O cargo é obrigatório',
+        }), 
+        microarea_id: z.string().nullable().optional(), 
+    })
+    .superRefine((data, ctx) => {
+      
+        if (data.cargo === 'ADM') {
+            return true;
         }
-    ),
+
+        if (data.cargo === 'AGT') {
+            if (
+                !data.microarea_id ||
+                data.microarea_id === 'null' ||
+                data.microarea_id.trim() === ''
+            ) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message:
+                        'Agentes de saúde (AGT) devem estar associados a uma microárea.',
+                    path: ['microarea_id'],
+                });
+            }
+        }
 });
 
-// Schema para validação de edição
+
 const agenteEdicaoSchema = z.object({
     nome: z.string().nonempty('O nome é obrigatório'),
     email: z.string().email('Email inválido').nonempty('O email é obrigatório'),
-    senha: z.string().optional(), // Senha opcional na edição
-    cargo: z.string().nonempty('O cargo é obrigatório'),
-    microarea_id: z.string().refine(
-        (value, ctx) => {
-            if (ctx.parent.cargo === 'ADM') return true;
-            return value && value !== 'null';
-        },
-        {
-            message: 'Agentes de saúde devem estar associados a uma microárea',
+    senha: z
+            .string()
+            .min(6, 'A nova senha deve ter pelo menos 6 caracteres')
+            .optional()
+            .or(z.literal('')), 
+        cargo: z.enum(['AGT', 'ADM'], {
+            required_error: 'O cargo é obrigatório',
+        }),
+        microarea_id: z.string().nullable().optional(),
+    })
+    .superRefine((data, ctx) => {
+        if (data.cargo === 'ADM') {
+            return true;
         }
-    ),
+        if (data.cargo === 'AGT') {
+            if (
+                !data.microarea_id ||
+                data.microarea_id === 'null' ||
+                data.microarea_id.trim() === ''
+            ) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message:
+                        'Agentes de saúde (AGT) devem estar associados a uma microárea.',
+                    path: ['microarea_id'],
+                });
+            }
+        }
 });
 
 type AgenteCadastroFormData = z.infer<typeof agenteCadastroSchema>;
@@ -107,7 +137,7 @@ export function GerenciamentoAgentes() {
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const { user } = useAuth();
 
-    // Form para cadastro
+    
     const {
         register: registerCadastro,
         handleSubmit: handleSubmitCadastro,
@@ -120,12 +150,12 @@ export function GerenciamentoAgentes() {
             nome: '',
             email: '',
             senha: '',
-            cargo: 'AGT', // Default para Agente
+            cargo: 'AGT', 
             microarea_id: '',
         },
     });
 
-    // Form para edição
+   
     const {
         register: registerEdicao,
         handleSubmit: handleSubmitEdicao,
@@ -140,12 +170,12 @@ export function GerenciamentoAgentes() {
             nome: '',
             email: '',
             senha: '',
-            cargo: '',
+            cargo: 'AGT',
             microarea_id: '',
         },
     });
 
-    // Buscar agentes e microáreas
+   
     const buscarAgentes = async () => {
         try {
             setCarregando(true);
@@ -173,12 +203,12 @@ export function GerenciamentoAgentes() {
         Promise.all([buscarAgentes(), buscarMicroareas()]);
     }, []);
 
-    // Funções para cadastro
+  
     const handleCadastrarAgente = async (data: AgenteCadastroFormData) => {
         try {
             setSalvando(true);
 
-            // Converter microarea_id para número ou null
+            
             const payload = {
                 ...data,
                 microarea_id:
@@ -204,13 +234,20 @@ export function GerenciamentoAgentes() {
         }
     };
 
-    // Funções para edição
+   
     const abrirModalEdicao = (agente: Agente) => {
         setAgenteParaEditar(agente);
         setValueEdicao('nome', agente.nome);
         setValueEdicao('email', agente.email);
         setValueEdicao('senha', ''); // Limpar campo de senha
-        setValueEdicao('cargo', agente.cargo || 'AGT');
+       const currentAgentCargo = agente.cargo;
+    let newFormCargoValue: 'AGT' | 'ADM';
+    if (currentAgentCargo === 'ADM') {
+        newFormCargoValue = 'ADM';
+    } else {
+        newFormCargoValue = 'AGT';
+    }
+    setValueEdicao('cargo', newFormCargoValue);
         setValueEdicao(
             'microarea_id',
             agente.microarea_id ? String(agente.microarea_id) : ''
@@ -224,7 +261,6 @@ export function GerenciamentoAgentes() {
         try {
             setSalvando(true);
 
-            // Só incluir a senha se foi fornecida
             const payload: any = {
                 nome: data.nome,
                 email: data.email,
@@ -256,7 +292,7 @@ export function GerenciamentoAgentes() {
         }
     };
 
-    // Funções para exclusão
+
     const abrirModalExclusao = (agente: Agente) => {
         if (user && agente.id === user.id) {
             toast.error(
@@ -290,7 +326,7 @@ export function GerenciamentoAgentes() {
         }
     };
 
-    // Função para mostrar o cargo formatado
+   
     const formatarCargo = (cargo: string | null) => {
         if (!cargo) return '-';
         switch (cargo) {

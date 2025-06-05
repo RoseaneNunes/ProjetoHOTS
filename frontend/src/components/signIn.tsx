@@ -129,7 +129,7 @@ export default function SingIn({ setMudarPage }: signInProps) {
                     </div>
                 </form>
             </section>
-            {/* Imagens comentadas */}
+            
         </div>
     );
 }

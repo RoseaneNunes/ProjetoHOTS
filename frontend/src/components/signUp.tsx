@@ -122,7 +122,7 @@ export default function SingUp({ setMudarPage }: SignUpProps) {
                         </div>
                         <button
                             type="button"
-                            onClick={() => setMudarPage(true)} // Para voltar para SignIn
+                            onClick={() => setMudarPage(true)} 
                             className="absolute top-4 left-4 z-10">
                             <ArrowLeftIcon size={40} color="#00332c" />
                         </button>
@@ -196,7 +196,7 @@ export default function SingUp({ setMudarPage }: SignUpProps) {
                                 control={control}
                                 render={({ field }) => (
                                     <Select
-                                        onValueChange={(value) =>
+                                        onValueChange={(value:string) =>
                                             field.onChange(
                                                 value
                                                     ? Number(value)
